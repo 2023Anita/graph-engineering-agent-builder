@@ -12,6 +12,18 @@ The case is intentionally narrower than a production Agent system:
 - external execution, publication, upload, Git effects and sensitive-data egress stayed unauthorized;
 - `closed_local` does not mean a final manuscript, production runtime, quality claim or cost claim.
 
+## Why this case is useful
+
+The case demonstrates a control architecture rather than an Agent-count
+benchmark. The writing task has parallel evidence responsibilities, a separate
+audit step, claim verification, an independent Reviewer, and an author-owned
+Choice Gate. Each transition carries a named artifact, so a later reviewer can
+trace why a draft was allowed to continue or why it stopped.
+
+The case also demonstrates a compatibility boundary: the new Graph Writing
+package can read the v0.8 G0-G3 and A/B/C/D rules without replacing the v0.8
+runtime or silently converting an author choice into execution authorization.
+
 ## Graph responsibilities
 
 | Responsibility | Case node | Evidence / artifact |
@@ -41,6 +53,19 @@ make verify
 ```
 
 These checks validate structure, source bindings, edge requirements, reviewer binding and the no-external-execution contract. They do not replace the author's scientific judgment or prove that an external publication occurred.
+
+## Reproducibility checklist
+
+| Check | Expected evidence | What it does not prove |
+|---|---|---|
+| Graph structure | Required nodes, edges, anchors and contracts pass | Semantic correctness of every claim |
+| Source integrity | Manifest fields and frozen hashes pass | That a source is authoritative for every domain |
+| Reviewer binding | Fresh context and report schema pass | That the Reviewer agrees with the author |
+| Mock run | Deterministic `simulated_success` or failure report | That a real Agent or external tool ran |
+| Closeout | `closed_local` plus handoff record | Publication, deployment or quality improvement |
+
+The strongest claim supported by this case is: **the local, evidence-bound
+workflow contract was assembled and closed under the stated gates**.
 
 ## Exact topology
 
