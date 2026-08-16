@@ -1,0 +1,34 @@
+digraph GraphWritingV09 {
+  graph [rankdir=LR, bgcolor="#fbfaf6", pad="0.25", nodesep="0.42", ranksep="0.65", fontname="Arial"];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=12, color="#12345b", penwidth=1.4, margin="0.14,0.09"];
+  edge [fontname="Arial", fontsize=9, color="#12345b", arrowsize=0.65];
+
+  anchors [label="S0\nSOURCE ANCHORS", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  scout_a [label="S1\nEVIDENCE SCOUT A", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  scout_b [label="S2\nEVIDENCE SCOUT B", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  counter [label="S3\nCOUNTER-EVIDENCE", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  audit [label="S4\nEVIDENCE AUDIT", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  outline [label="S5\nOUTLINE", fillcolor="#0d2f62", fontcolor="white"];
+  draft [label="S6\nSECTION DRAFT A/B", fillcolor="#0d2f62", fontcolor="white"];
+  claim [label="S7\nCLAIM VERIFY", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  synth [label="S8\nSYNTHESIS", fillcolor="#0d2f62", fontcolor="white"];
+  reviewer [label="S9\nINDEPENDENT REVIEWER", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  choice [label="AUTHOR CHOICE\nC / CAUTIOUS", shape=diamond, fillcolor="#f5d28a", color="#b87500", fontcolor="#3c2600"];
+  handoff [label="STOP / HANDOFF\nclosed_local", fillcolor="#0d2f62", fontcolor="white"];
+  v08 [label="READ-ONLY v0.8 BOUNDARY\nG0-G3 + A/B/C/D", shape=note, fillcolor="#f3f2ee", color="#7a7a7a", fontcolor="#3b3b3b"];
+
+  anchors -> scout_a;
+  anchors -> scout_b;
+  anchors -> counter;
+  scout_a -> audit [label="evidence packet"];
+  scout_b -> audit;
+  counter -> audit;
+  audit -> outline [label="audited evidence"];
+  outline -> draft;
+  draft -> claim;
+  claim -> synth [label="verified claims"];
+  synth -> reviewer [label="draft + bindings"];
+  reviewer -> choice [label="Reviewer report"];
+  choice -> handoff [label="author decision"];
+  v08 -> choice [label="read-only constraint", style=dashed, color="#777777"];
+}

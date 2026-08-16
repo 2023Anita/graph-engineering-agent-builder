@@ -1,0 +1,34 @@
+digraph BuilderArchitecture {
+  graph [rankdir=LR, bgcolor="#fbfaf6", pad="0.25", nodesep="0.55", ranksep="0.8", fontname="Arial"];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=13, color="#12345b", penwidth=1.5, margin="0.16,0.10"];
+  edge [fontname="Arial", fontsize=10, color="#12345b", arrowsize=0.7];
+
+  task [label="TASK\nTask Brief", fillcolor="#0d2f62", fontcolor="white"];
+  assess [label="ASSESS\nDirect / Loop / Graph", fillcolor="#0d2f62", fontcolor="white"];
+  plan [label="PLAN\nGraph Spec", fillcolor="#0d2f62", fontcolor="white"];
+  gate [label="HUMAN GATE\nGoal • Permission • Frozen rules", fillcolor="#f5d28a", color="#b87500", fontcolor="#3c2600"];
+  prep [label="EXECUTION PREP\nContracts • Budget • Handoff", fillcolor="#0d2f62", fontcolor="white"];
+  loops [label="EXECUTION LOOPS\nCandidates / drafts", fillcolor="#0d2f62", fontcolor="white"];
+  anchor [label="REALITY ANCHOR\nFrozen, independent evidence", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  verify [label="INDEPENDENT VERIFY\nFresh context", fillcolor="#dceeed", color="#117d82", fontcolor="#0b6266"];
+  audit [label="AUDIT / COUNTER-SIGNAL\nDrift • gaming • side effects", fillcolor="#f5d28a", color="#b87500", fontcolor="#3c2600"];
+  arb [label="ARBITRATION\nConflict / escalation", fillcolor="#f5d28a", color="#b87500", fontcolor="#3c2600"];
+  stop [label="STOP / HANDOFF\nResume • rollback • escalate", fillcolor="#0d2f62", fontcolor="white"];
+
+  task -> assess [label="task brief"];
+  assess -> plan [label="proposal"];
+  plan -> gate [label="graph spec"];
+  gate -> prep [label="approval record", color="#b87500"];
+  prep -> loops [label="execution contract"];
+  anchor -> verify [label="evidence", color="#117d82"];
+  loops -> verify [label="candidate artifact"];
+  verify -> prep [label="review report", color="#117d82"];
+  verify -> audit [label="fresh evidence", color="#b87500", style=dashed];
+  audit -> arb [label="escalate", color="#b87500", style=dashed];
+  arb -> loops [label="constrain / veto", color="#b87500", style=dashed];
+  audit -> stop [label="veto", color="#b87500", style=dashed];
+  arb -> stop [label="handoff", color="#b87500", style=dashed];
+  loops -> stop [label="run report / handoff"];
+
+  {rank=same; anchor; loops;}
+}

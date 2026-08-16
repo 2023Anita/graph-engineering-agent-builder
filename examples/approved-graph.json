@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "title": "已批准的本地 Mock Executor 演示 Graph",
+  "mode": "graph",
+  "state": "ready",
+  "root_goal": {"statement": "演示本地确定性 Graph 调度", "human_owner": "演示负责人", "observable_success": "生成可审阅的模拟运行报告"},
+  "permissions": {"human_owner": "演示负责人", "allowed_actions": ["本地模拟"], "forbidden_actions": ["网络调用", "发布"]},
+  "frozen_rules": ["本示例只允许本地确定性模拟", "验证节点保持独立上下文"],
+  "approval": {"status": "approved", "approved_by": "演示负责人", "record": "仅批准本地 Mock Executor 演示"},
+  "budget": {"max_agents": 4, "max_concurrency": 2, "max_retries": 0, "max_cost_units": 1},
+  "anchors": [{"node_id": "reality-anchor", "source": "固定演示清单", "evidence_form": "合成清单", "owner": "演示负责人", "freshness_rule": "演示运行前确认", "frozen": true}],
+  "nodes": [
+    {"id": "reality-anchor", "kind": "anchor", "responsibility": "提供冻结的演示锚点", "owner": "演示负责人", "contract": {"inputs": ["demo-manifest"], "outputs": ["reality-evidence"]}},
+    {"id": "worker-a", "kind": "execution", "responsibility": "生成合成候选 A", "owner": "演示执行者 A", "contract": {"inputs": ["demo-manifest"], "outputs": ["candidate-a"]}},
+    {"id": "worker-b", "kind": "execution", "responsibility": "生成合成候选 B", "owner": "演示执行者 B", "contract": {"inputs": ["demo-manifest"], "outputs": ["candidate-b"]}},
+    {"id": "independent-verifier", "kind": "verification_loop", "responsibility": "独立检查合成候选", "owner": "演示审校者", "context_scope": "fresh-independent", "contract": {"inputs": ["candidate-a", "candidate-b", "reality-evidence"], "outputs": ["verification-report"]}},
+    {"id": "synthesis", "kind": "synthesis", "responsibility": "综合通过验证的候选", "owner": "演示综合者", "contract": {"inputs": ["verification-report"], "outputs": ["synthetic-draft"]}},
+    {"id": "human-approval", "kind": "human_gate", "responsibility": "记录本地模拟批准", "owner": "演示负责人", "contract": {"inputs": ["graph-spec"], "outputs": ["approval-record"]}},
+    {"id": "stop-handoff", "kind": "stop_handoff", "responsibility": "记录模拟交接", "owner": "演示负责人", "contract": {"inputs": ["run-status"], "outputs": ["handoff-record"]}}
+  ],
+  "edges": [
+    {"from": "reality-anchor", "to": "independent-verifier", "relation": "anchors", "artifact": "reality-evidence"},
+    {"from": "human-approval", "to": "worker-a", "relation": "constrains", "artifact": "approval-record"},
+    {"from": "human-approval", "to": "worker-b", "relation": "constrains", "artifact": "approval-record"},
+    {"from": "worker-a", "to": "independent-verifier", "relation": "feeds", "artifact": "candidate-a"},
+    {"from": "worker-b", "to": "independent-verifier", "relation": "feeds", "artifact": "candidate-b"},
+    {"from": "independent-verifier", "to": "synthesis", "relation": "constrains", "artifact": "verification-report"},
+    {"from": "synthesis", "to": "stop-handoff", "relation": "hands_off", "artifact": "synthetic-draft"},
+    {"from": "human-approval", "to": "stop-handoff", "relation": "hands_off", "artifact": "approval-record"}
+  ],
+  "failure_policy": {"on_validation_failure": "stop_and_handoff", "on_budget_exhausted": "handoff_to_human", "on_permission_conflict": "block"},
+  "stop_handoff": {"owner": "演示负责人", "conditions": ["模拟失败"], "artifact": "handoff-record"},
+  "execution_contract": {"external_execution": false, "note": "仅用于本地确定性 Mock Executor 演示。"}
+}

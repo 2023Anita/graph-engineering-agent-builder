@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "title": "为课程资料建立可验证的研究与审校 Graph",
+  "mode": "graph",
+  "state": "awaiting_approval",
+  "root_goal": {
+    "statement": "形成一份可追溯、经过独立审校的课程资料包",
+    "human_owner": "课程负责人",
+    "observable_success": "负责人确认资料包、来源清单和审校报告均完整"
+  },
+  "permissions": {"human_owner": "课程负责人", "allowed_actions": ["本地分析", "生成草案"], "forbidden_actions": ["发布", "上传", "修改来源"]},
+  "frozen_rules": ["根目标、来源选择、锚点和权限仅由课程负责人修改", "验证者不读取执行者的私有推理上下文"],
+  "approval": {"status": "pending", "approved_by": null, "record": "等待课程负责人确认 Graph Spec"},
+  "budget": {"max_agents": 4, "max_concurrency": 2, "max_retries": 1, "max_cost_units": 20},
+  "anchors": [{"node_id": "reality-anchor", "source": "课程负责人固定的来源清单", "evidence_form": "签名来源清单与原始文件校验值", "owner": "课程负责人", "freshness_rule": "每次运行前由课程负责人确认版本", "frozen": true}],
+  "nodes": [
+    {"id": "reality-anchor", "kind": "anchor", "responsibility": "提供研究执行者不能改写的固定来源证据", "owner": "课程负责人", "contract": {"inputs": ["signed-source-manifest"], "outputs": ["reality-evidence"]}},
+    {"id": "research-a", "kind": "execution_loop", "responsibility": "从固定来源提取主题 A 的可引用证据", "owner": "研究执行者 A", "contract": {"inputs": ["source-manifest"], "outputs": ["topic-a-evidence"]}, "context_scope": "execution-only"},
+    {"id": "research-b", "kind": "execution_loop", "responsibility": "从固定来源提取主题 B 的可引用证据", "owner": "研究执行者 B", "contract": {"inputs": ["source-manifest"], "outputs": ["topic-b-evidence"]}, "context_scope": "execution-only"},
+    {"id": "independent-verifier", "kind": "verification_loop", "responsibility": "用冻结来源独立核对两份证据包", "owner": "独立审校者", "contract": {"inputs": ["topic-a-evidence", "topic-b-evidence", "source-manifest"], "outputs": ["verification-report"]}, "context_scope": "fresh-independent"},
+    {"id": "synthesis", "kind": "synthesis", "responsibility": "只综合通过独立核对的证据", "owner": "综合执行者", "contract": {"inputs": ["verification-report"], "outputs": ["course-draft"]}},
+    {"id": "human-approval", "kind": "human_gate", "responsibility": "确认根目标、权限、锚点和执行许可", "contract": {"inputs": ["graph-spec"], "outputs": ["approval-record"]}, "owner": "课程负责人"},
+    {"id": "stop-handoff", "kind": "stop_handoff", "responsibility": "在失败、预算耗尽或权限冲突时交接", "contract": {"inputs": ["run-status"], "outputs": ["handoff-record"]}, "owner": "课程负责人"}
+  ],
+  "edges": [
+    {"from": "reality-anchor", "to": "independent-verifier", "relation": "anchors", "artifact": "reality-evidence"},
+    {"from": "human-approval", "to": "research-a", "relation": "constrains", "artifact": "approval-record"},
+    {"from": "human-approval", "to": "research-b", "relation": "constrains", "artifact": "approval-record"},
+    {"from": "research-a", "to": "independent-verifier", "relation": "feeds", "artifact": "topic-a-evidence"},
+    {"from": "research-b", "to": "independent-verifier", "relation": "feeds", "artifact": "topic-b-evidence"},
+    {"from": "independent-verifier", "to": "synthesis", "relation": "constrains", "artifact": "verification-report"},
+    {"from": "synthesis", "to": "stop-handoff", "relation": "hands_off", "artifact": "course-draft"},
+    {"from": "human-approval", "to": "stop-handoff", "relation": "hands_off", "artifact": "approval-record"}
+  ],
+  "failure_policy": {"on_validation_failure": "stop_and_handoff", "on_budget_exhausted": "handoff_to_human", "on_permission_conflict": "block"},
+  "stop_handoff": {"owner": "课程负责人", "conditions": ["验证失败", "预算耗尽", "权限冲突"], "artifact": "handoff-record"},
+  "execution_contract": {"external_execution": false, "note": "本 MVP 只生成准备与记录文件，不执行领域任务。"}
+}
